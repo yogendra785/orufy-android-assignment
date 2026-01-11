@@ -9,11 +9,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.orufy.navigation.NavRoutes
+import android.widget.Toast
+import androidx.compose.ui.platform.LocalContext
+import com.example.orufy.utils.validateAndFormatUrl
+import java.net.URLEncoder
+import java.nio.charset.StandardCharsets
+
+
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(navController: NavHostController) {
     var urlText by remember { mutableStateOf("") }
+    val context = LocalContext.current
 
     Scaffold(
         topBar = {
@@ -58,7 +67,19 @@ fun HomeScreen(navController: NavHostController) {
 
             Button(
                 onClick = {
-                    // TODO: Handle opening the URL
+                   val validUrl = validateAndFormatUrl(urlText)
+                    if(validUrl==null){
+                        Toast.makeText(
+                            context,
+                            "Please enter a valid URL",
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    } else {
+                        val encodedUrl = URLEncoder.encode(validUrl, StandardCharsets.UTF_8.toString())
+                        navController.navigate(
+                            "webview/$encodedUrl"
+                        )
+                    }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
