@@ -1,6 +1,5 @@
 # Orufy Android Assignment
 
-[![Kotlin](https://img.shields.io/badge/Kotlin-100%25-blue)](https://kotlinlang.org) [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-orange)](https://developer.android.com/jetpack/compose) 
 
 Android assignment demonstrating a small, modern Android app built with Jetpack Compose, Room, Navigation, and WebView integration.
 
