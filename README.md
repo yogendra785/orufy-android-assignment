@@ -1,145 +1,135 @@
-📱 Orufy Android Assignment (Jetpack Compose)
-📌 Overview
+# Orufy Android Assignment
 
-This project is a 3-screen Android application built as part of the Android Developer Internship Assignment for Orufy Technologies Pvt. Ltd.
+[![Kotlin](https://img.shields.io/badge/Kotlin-100%25-blue)](https://kotlinlang.org) [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-orange)](https://developer.android.com/jetpack/compose) 
 
-The app demonstrates:
+Android assignment demonstrating a small, modern Android app built with Jetpack Compose, Room, Navigation, and WebView integration.
 
-Modern Jetpack Compose UI
+---
 
-Safe navigation with arguments
+## Table of Contents
+- About
+- Features
+- Tech stack
+- Screens
+- Architecture & Key Components
+- Getting started
+- Usage
+- Project structure
+- Testing
+- Contributing
+- Author
+- License
 
-WebView integration inside Compose
+---
 
-Local data persistence using Room
+## About
+A compact 3-screen Android application created as part of the Android Developer Internship assignment for Orufy Technologies. The app shows how to combine Jetpack Compose UI, Navigation (Compose), Room for local persistence, and an embedded WebView, with attention to clean architecture and edge-case handling.
 
-Mock API upload using Beeceptor
+## Features
+- Compose-based UI (Material 3)
+- Home screen with URL input and image carousel
+- WebView screen that loads URLs inside the app
+- History screen backed by Room (stores opened URLs with timestamps)
+- URL validation and normalization (auto-prepend https:// when missing)
+- Upload history to a mock API (Beeceptor)
+- Live updates with Room + Kotlin Flow
+- Coroutines for background operations
 
-The focus of this assignment is clean architecture, edge-case handling, and real-world Android practices.
+## Tech stack
+- Language: Kotlin (100%)
+- UI: Jetpack Compose (Material 3)
+- Navigation: Navigation Compose
+- Persistence: Room (SQLite)
+- Networking: Retrofit
+- Concurrency: Kotlin Coroutines + Flow
+- WebView: AndroidView interoperability
 
-🛠 Tech Stack
+## Screens
+- Home
+  - URL input with validation
+  - Image carousel (3 static images)
+  - History button
+- WebView
+  - Loads and displays the provided URL
+  - Supports JavaScript and DOM storage
+  - Back and Close controls
+- History
+  - Shows saved URLs with timestamps
+  - Clear History and Upload actions
 
-Language: Kotlin
+## Architecture & Key Components
+- UI: Stateless Compose screens where possible; state hoisted to ViewModels
+- Navigation: NavHost with safe argument encoding/decoding
+- Data: Room entities, DAOs and repository pattern
+- Networking: Retrofit service for uploading history to mock endpoint
+- WebView: Composable wrapper using AndroidView and remember to avoid reloads
 
-UI: Jetpack Compose (Material 3)
+## Getting started
+Prerequisites
+- Android Studio (Arctic Fox or newer recommended)
+- JDK 11+
+- Android SDK (API 21+)
 
-Navigation: Navigation Compose
+Clone and open
+```bash
+git clone https://github.com/yogendra785/orufy-android-assignment.git
+cd orufy-android-assignment
+# Open the project in Android Studio and run on an emulator or device
+```
 
-Local Storage: Room Database
+Build
+- Use Android Studio Run/Debug or:
+```bash
+./gradlew assembleDebug
+```
 
-WebView: AndroidView interoperability
+## Usage
+1. Launch the app on a device or emulator (internet required for WebView and upload).
+2. On Home, enter a URL (e.g. google.com). The input is validated and normalized.
+3. Tap to open — the URL is saved in local history with a timestamp.
+4. View the page inside the in-app WebView. Use Back to return or Close to reset.
+5. Open History to view, clear, or upload saved URLs to the mock API.
 
-Networking: Retrofit
-📱 Screens & Features
-🏠 Home Screen
+## Project structure (high level)
+- app/src/main/java/com/example/orufy
+  - home — HomeScreen and carousel
+  - webview — WebViewScreen
+  - history — HistoryScreen
+  - navigation — NavGraph & routes
+  - data/local — Room (Entities, DAO, Database)
+  - data/remote — Retrofit API
+  - utils — URL validation and helpers
+- app/src/main/res — resources (images, strings, themes)
 
-URL input field
+## Testing
+- Unit tests: app/src/test
+- Instrumented tests: app/src/androidTest
 
-Input validation:
+Suggested manual checks
+- Open without URL → validation error
+- Invalid URL → validation error
+- google.com → opens correctly in WebView
+- URLs persist after app restart
+- History clears instantly
+- Upload visible in Beeceptor request logs
 
-Empty input
-
-Invalid URL format
-
-Leading/trailing spaces
-
-Automatically prepends https:// if missing
-
-Image carousel (UI-only, 3 static images with dot indicators)
-
-History button in top app bar
-
-Saves every opened URL with timestamp in local database
-🌐 WebView Screen
-
-Loads the provided URL inside the app
-
-Built using AndroidView inside Compose
-
-Displays the currently loaded URL in the top app bar
-
-Handles modern web requirements (JavaScript, DOM storage)
-
-Buttons:
-
-Back: returns to Home while retaining last URL
-
-Close: clears navigation stack and resets Home
-
-📜 History Screen
-
-Displays all previously opened URLs
-
-Shows formatted timestamps
-
-Data updates automatically using Room + Flow
-
-Buttons:
-
-Clear History: deletes all stored URLs
-
-Upload: uploads stored data to a mock API (Beeceptor)
-🧠 Key Implementation Highlights
-
-State-driven UI: Compose state updates UI automatically
-
-Safe navigation: URL arguments are encoded & decoded to prevent crashes
-
-Room + Flow: Live updates without manual refresh
-
-Coroutines: All DB and network operations run on Dispatchers.IO
-
-WebView stability: Uses remember to avoid reloads during recomposition
-
-🧪 Testing Checklist
-
-Open without URL → validation error
-
-Invalid URL → validation error
-
-google.com → opens correctly in WebView
-
-URLs persist after app restart
-
-History clears instantly
-
-Upload visible in Beeceptor request logs
-🌐 Mock API (Beeceptor)
-
-A mock backend endpoint was created using Beeceptor to simulate uploading history data.
-
+## Mock API (Beeceptor)
+A Beeceptor endpoint is used to simulate a backend for uploading history data.
 Example endpoint:
-
 https://orufy-history-api.free.beeceptor.com/
 
+## Contributing
+Contributions are welcome. Suggested workflow:
+1. Fork the repo
+2. Create a branch: git checkout -b feature/your-feature
+3. Make changes and run tests
+4. Push and open a pull request
 
-This allows testing API integration without a real backend.
-com.example.orufy
-│
-├── home        // HomeScreen + carousel
-├── webview     // WebViewScreen
-├── history     // HistoryScreen
-├── navigation  // NavGraph & routes
-├── data
-│   ├── local   // Room (Entity, DAO, DB)
-│   └── remote  // Retrofit API
-└── utils       // URL validation
-▶️ How to Run
+Please follow Kotlin & Compose style conventions and include tests for new logic.
 
-Clone the repository
-
-Open in Android Studio
-
-Sync Gradle
-
-Run on emulator or physical device (Internet required)
-
-👤 Author
-
-Yogendra Singh
-Android Developer (Internship Assignment)
+## Author
+Yogendra Singh — Android Developer
 GitHub: https://github.com/yogendra785
 
-Mock API: Beeceptor
-
-Async: Kotlin Coroutines + Flow
+## License
+See LICENSE file in the repository if present. If no license is included, please contact the author for permission before reusing the code.
