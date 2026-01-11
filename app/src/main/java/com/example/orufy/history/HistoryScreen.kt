@@ -1,37 +1,36 @@
 package com.example.orufy.history
 
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.Divider
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
+import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.orufy.data.local.db.AppDatabase
-import java.util.Date
+import com.example.orufy.data.remote.RetrofitInstance
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HistoryScreen(navController: NavHostController) {
 
     val context = LocalContext.current
     val db = remember { AppDatabase.getDatabase(context) }
-    val urlList by db.urlHistoryDao().getAllUrls()
+    val coroutineScope = rememberCoroutineScope()
+
+    val historyList by db.urlHistoryDao()
+        .getAllUrls()
         .collectAsState(initial = emptyList())
 
     Scaffold(
@@ -42,26 +41,95 @@ fun HistoryScreen(navController: NavHostController) {
                     IconButton(onClick = { navController.popBackStack() }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
+                },
+                actions = {
+
+                    // Upload Button
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                try {
+                                    RetrofitInstance.api.uploadHistory(historyList)
+                                } catch (e: Exception) {
+                                    e.printStackTrace()
+                                }
+                            }
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.CloudUpload,
+                            contentDescription = "Upload History"
+                        )
+                    }
+
+                    // Clear Button
+                    IconButton(
+                        onClick = {
+                            coroutineScope.launch(Dispatchers.IO) {
+                                db.urlHistoryDao().clearAll()
+                            }
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.Delete,
+                            contentDescription = "Clear History"
+                        )
+                    }
                 }
             )
         }
     ) { paddingValues ->
 
-        LazyColumn(
-            modifier = Modifier
-                .padding(paddingValues)
-                .padding(16.dp)
-        ) {
-            items(urlList) { item ->
-                Text(text = item.url)
-                Text(
-                    text = Date(item.timestamp).toString(),
-                    style = MaterialTheme.typography.bodySmall
-                )
-                Divider()
+        if (historyList.isEmpty()) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                contentAlignment = Alignment.Center
+            ) {
+                Text("No history found")
+            }
+        } else {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(16.dp)
+            ) {
+                items(historyList) { item ->
+                    HistoryItem(
+                        url = item.url,
+                        timestamp = item.timestamp
+                    )
+                }
             }
         }
     }
 }
 
+@Composable
+fun HistoryItem(
+    url: String,
+    timestamp: Long
+) {
+    val formattedTime = remember(timestamp) {
+        SimpleDateFormat(
+            "dd MMM yyyy, hh:mm a",
+            Locale.getDefault()
+        ).format(Date(timestamp))
+    }
+
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        Text(
+            text = url,
+            style = MaterialTheme.typography.bodyLarge
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Text(
+            text = formattedTime,
+            style = MaterialTheme.typography.bodySmall
+        )
+        Divider(modifier = Modifier.padding(top = 8.dp))
+    }
+}
 
