@@ -1,4 +1,4 @@
-package com.example.orufy.screens
+package com.example.orufy.webview
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
