@@ -14,6 +14,13 @@ import androidx.compose.ui.platform.LocalContext
 import com.example.orufy.utils.validateAndFormatUrl
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import androidx.compose.runtime.LaunchedEffect
+import com.example.orufy.data.local.db.AppDatabase
+import com.example.orufy.data.local.entity.UrlHistoryEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 
 
 
@@ -23,6 +30,8 @@ import java.nio.charset.StandardCharsets
 fun HomeScreen(navController: NavHostController) {
     var urlText by remember { mutableStateOf("") }
     val context = LocalContext.current
+    val db = remember { AppDatabase.getDatabase(context) }
+    val coroutineScope = rememberCoroutineScope()
 
     Scaffold(
         topBar = {
@@ -67,24 +76,40 @@ fun HomeScreen(navController: NavHostController) {
 
             Button(
                 onClick = {
-                   val validUrl = validateAndFormatUrl(urlText)
-                    if(validUrl==null){
+                    val validUrl = validateAndFormatUrl(urlText)
+
+                    if (validUrl == null) {
                         Toast.makeText(
                             context,
                             "Please enter a valid URL",
                             Toast.LENGTH_SHORT
                         ).show()
                     } else {
-                        val encodedUrl = URLEncoder.encode(validUrl, StandardCharsets.UTF_8.toString())
-                        navController.navigate(
-                            "webview/$encodedUrl"
+
+                        // 1️⃣ Save to database (background thread)
+                        coroutineScope.launch(Dispatchers.IO) {
+                            db.urlHistoryDao().insertUrl(
+                                UrlHistoryEntity(
+                                    url = validUrl,
+                                    timestamp = System.currentTimeMillis()
+                                )
+                            )
+                        }
+
+                        // 2️⃣ Navigate to WebView
+                        val encodedUrl = URLEncoder.encode(
+                            validUrl,
+                            StandardCharsets.UTF_8.toString()
                         )
+
+                        navController.navigate("webview/$encodedUrl")
                     }
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text("Open")
             }
+
         }
     }
 }
