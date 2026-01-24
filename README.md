@@ -1,5 +1,4 @@
-# Orufy Android Assignment
-
+# Web-View App
 
 Android assignment demonstrating a small, modern Android app built with Jetpack Compose, Room, Navigation, and WebView integration.
 
